@@ -1,5 +1,5 @@
 """
-FLAT - Flet Layout Application Template
+GATE - GCCB Alma Transfer Environment
 A template Flet desktop application with persistent settings, logging,
 function management, and help documentation system.
 """
@@ -46,9 +46,9 @@ except ImportError:
     PDF_AVAILABLE = False
 
 # Configure logging
-DATA_DIR = Path.home() / "FLAT-data"
+DATA_DIR = Path.home() / "GATE-data"
 os.makedirs(DATA_DIR / "logfiles", exist_ok=True)
-log_filename = DATA_DIR / "logfiles" / f"flat_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+log_filename = DATA_DIR / "logfiles" / f"gate_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
 
 file_handler = logging.FileHandler(log_filename)
 file_handler.setLevel(logging.DEBUG)
@@ -218,14 +218,14 @@ def convert_wav_to_mp3(
 
 
 def main(page: ft.Page):
-    page.title = "FLAT - Flet Layout Application Template"
+    page.title = "GATE - GCCB Alma Transfer Environment"
     page.padding = 20
     page.window.width = 1050
     page.window.height = 950
     page.scroll = ft.ScrollMode.AUTO
 
     storage = PersistentStorage()
-    logger.info("FLAT application started")
+    logger.info("GATE application started")
 
     # ------------------------------------------------------------------ helpers
 
@@ -2990,9 +2990,9 @@ For each audio file:
             controls=[
                 # ---- Title
                 ft.Row([
-                    ft.Icon(ft.Icons.APARTMENT, size=28, color=ft.Colors.BLUE_700),
+                    ft.Text("⛩️", size=28),
                     ft.Text(
-                        "FLAT — Flet Layout Application Template",
+                        "GATE — GCCB Alma Transfer Environment",
                         size=24,
                         weight=ft.FontWeight.BOLD,
                     ),

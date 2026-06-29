@@ -1,6 +1,6 @@
-# FLAT Changelog
+# GATE Changelog
 
-All notable changes to the FLAT (Flet Layout Application Template) project are documented in this file.
+All notable changes to the GATE (GCCB Alma Transfer Environment) project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -11,18 +11,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **Function 0: App Settings** - Configuration management system
-  - Settings stored in `flat_settings.json` within working/output directory
+  - Settings stored in `gate_settings.json` within working/output directory
   - Sensitive field encryption using Fernet (cryptography library)
   - Popup dialog editor for all settings
   - Support for boolean fields with flexible input (true/false, yes/no, 1/0, on/off)
   - Encrypted fields: `api_key`, `api_secret`, `password`
-  - Encryption key stored separately in `~/.FLAT-data/encryption_key` with restricted permissions
+  - Encryption key stored separately in `~/.GATE-data/encryption_key` with restricted permissions
   - Settings automatically decrypt on load and encrypt on save
   - Safe for version control (credentials stored encrypted)
 - **CollectionBuilder Deployment Selection** in main UI
-  - Preset selector plus custom URL input
+  - Single URL input with validation and save actions
   - URL validation (requires https and host)
-  - Save validated deployment URL to `flat_settings.json`
+  - Save validated deployment URL to `gate_settings.json`
   - Load persisted deployment URL per working/output folder
 - Added `cryptography` dependency to `python_requirements.txt`
 - Created `FUNCTION_0_APP_SETTINGS.md` documentation
@@ -42,13 +42,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Initial Release
 
-FLAT is a production-ready template for building desktop applications with Flet. It was created by extracting and generalizing the proven UI framework from OHM (Oral History Manager), resulting in a clean 715-line template that maintains all of OHM's battle-tested features while removing application-specific functionality.
+GATE is a production-ready template for building desktop applications with Flet. It was created by extracting and generalizing the proven UI framework from OHM (Oral History Manager), resulting in a clean 715-line template that maintains all of OHM's battle-tested features while removing application-specific functionality.
 
 ### Features
 
 #### UI Architecture (Based on OHM)
 - **Professional Layout** with proven vertical spacing and organization
-- **Apartment Icon** (🏢) in header using Flet Icons
+- **Gate Icon** (⛩️) in header
 - **Collapsible Directories Section** to maximize screen space once directories are set
 - **File Selection Section** always visible for quick file changes between operations
 - **Status Output** with copy-to-clipboard button
@@ -61,10 +61,10 @@ FLAT is a production-ready template for building desktop applications with Flet.
   - Automatic save/restore of window position
   - Directory and file selections persisted across sessions
   - Function usage tracking with timestamps and counts
-  - Stored in `~/FLAT-data/persistent.json`
+  - Stored in `~/GATE-data/persistent.json`
 
 - **Logging System**
-  - Timestamped log files in `~/FLAT-data/logfiles/`
+  - Timestamped log files in `~/GATE-data/logfiles/`
   - Real-time log display in UI with prepended entries
   - Separate file and console handlers
   - Configurable log levels
@@ -111,7 +111,7 @@ FLAT is a production-ready template for building desktop applications with Flet.
 - Cross-platform: macOS, Windows, Linux
 
 ### Credits
-FLAT's UI architecture is based on the patterns developed for OHM (Oral History Manager) by Mark McFate for Digital.Grinnell. The template represents the distillation of real-world application development experience into a reusable foundation.
+GATE's UI architecture is based on the patterns developed for OHM (Oral History Manager) by Mark McFate for Digital.Grinnell. The template represents the distillation of real-world application development experience into a reusable foundation.
 
 ---
 
@@ -138,7 +138,7 @@ Contributions are welcome! Please feel free to submit pull requests or open issu
 
 ## Repository
 
-https://github.com/Digital-Grinnell/FLAT
+https://github.com/Digital-Grinnell/GATE
 
 ### Documentation
 
@@ -166,7 +166,7 @@ https://github.com/Digital-Grinnell/FLAT
 
 ## Future Development
 
-FLAT is a starting template. When you create your own application from FLAT:
+GATE is a starting template. When you create your own application from GATE:
 
 1. Update the changelog with your app's version history
 2. Replace example functions with your own
@@ -177,6 +177,6 @@ FLAT is a starting template. When you create your own application from FLAT:
 
 ## Credits
 
-FLAT was derived from the OHM (Oral History Manager) project, which demonstrated effective patterns for Flet desktop applications including persistent settings, logging, function management, and help documentation.
+GATE was derived from the OHM (Oral History Manager) project, which demonstrated effective patterns for Flet desktop applications including persistent settings, logging, function management, and help documentation.
 
 Built with [Flet](https://flet.dev) - a Python framework for building desktop applications.

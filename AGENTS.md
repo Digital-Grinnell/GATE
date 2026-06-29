@@ -53,10 +53,10 @@ If the issue is wording, workflow explanation, or help text, do not edit app.py 
 
 ## Settings, Security, And Data Handling
 
-- Function 0 settings are per working/output folder in flat_settings.json.
+- Function 0 settings are per working/output folder in gate_settings.json.
 - Sensitive fields are encrypted by app logic; do not weaken or remove that behavior casually.
 - Do not hardcode credentials, API keys, or environment-specific secrets.
-- Runtime state/logs are stored outside the repo under ~/FLAT-data/.
+- Runtime state/logs are stored outside the repo under ~/GATE-data/.
 - Do not treat runtime artifacts as repository source files.
 
 ## Function Documentation Sync

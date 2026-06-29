@@ -1,5 +1,5 @@
 """
-FLAT - Flet Layout Application Template
+GATE - GCCB Alma Transfer Environment
 A template Flet desktop application with persistent settings, logging,
 function management, and help documentation system based on OHM's proven UI.
 """
@@ -18,9 +18,9 @@ from urllib.parse import urlparse
 from cryptography.fernet import Fernet, InvalidToken
 
 # Configure logging
-DATA_DIR = Path.home() / "FLAT-data"
+DATA_DIR = Path.home() / "GATE-data"
 os.makedirs(DATA_DIR / "logfiles", exist_ok=True)
-log_filename = DATA_DIR / "logfiles" / f"flat_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+log_filename = DATA_DIR / "logfiles" / f"gate_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
 
 file_handler = logging.FileHandler(log_filename)
 file_handler.setLevel(logging.DEBUG)
@@ -50,7 +50,7 @@ ENCRYPTION_KEY_FILE = DATA_DIR / "encryption_key"
 SENSITIVE_FIELDS = ["api_key", "api_secret", "password"]
 
 # App settings filename and defaults
-APP_SETTINGS_FILENAME = "flat_settings.json"
+APP_SETTINGS_FILENAME = "gate_settings.json"
 DEFAULT_APP_SETTINGS = {
     "auto_save_enabled": False,
     "auto_save_format": "txt",
@@ -59,11 +59,6 @@ DEFAULT_APP_SETTINGS = {
     "password": "",
     "gccb_deployment_url": "https://black-sky-0a5891010.7.azurestaticapps.net/",
 }
-
-GCCB_DEPLOYMENT_PRESETS = [
-    "",
-    "https://black-sky-0a5891010.7.azurestaticapps.net/",
-]
 
 
 class PersistentStorage:
@@ -126,7 +121,7 @@ class PersistentStorage:
 
 def get_or_create_encryption_key() -> bytes:
     """
-    Get or create the encryption key from ~/.FLAT-data/encryption_key.
+    Get or create the encryption key from ~/.GATE-data/encryption_key.
     Returns the Fernet key as bytes.
     """
     if ENCRYPTION_KEY_FILE.exists():
@@ -296,14 +291,14 @@ def load_help_document(filename: str) -> str:
 
 
 def main(page: ft.Page):
-    page.title = "FLAT - Flet Layout Application Template"
+    page.title = "GATE - GCCB Alma Transfer Environment"
     page.padding = 20
     page.window.width = 1050
     page.window.height = 900
     page.scroll = ft.ScrollMode.AUTO
 
     storage = PersistentStorage()
-    logger.info("FLAT application started")
+    logger.info("GATE application started")
 
     # ------------------------------------------------------------------ helpers
 
@@ -486,8 +481,6 @@ def main(page: ft.Page):
                 return
 
             deployment_url_field.value = normalized_url
-            selected_preset = normalized_url if normalized_url in GCCB_DEPLOYMENT_PRESETS else ""
-            gccb_preset_dropdown.value = selected_preset
             storage.set_ui_state("last_gccb_url", normalized_url)
             add_log_message(f"Settings saved: {save_result}")
             update_status("Application settings updated")
@@ -784,7 +777,7 @@ def main(page: ft.Page):
     # ------------------------------------------------------------------ UI fields
 
     def load_gccb_deployment_from_settings(working_dir: str):
-        """Load GCCB deployment setting from flat_settings.json and update UI."""
+        """Load GCCB deployment setting from gate_settings.json and update UI."""
         nonlocal selected_deployment_url
         if not working_dir:
             return
@@ -798,18 +791,7 @@ def main(page: ft.Page):
         if deployment_url:
             selected_deployment_url = deployment_url
             deployment_url_field.value = deployment_url
-            gccb_preset_dropdown.value = (
-                deployment_url if deployment_url in GCCB_DEPLOYMENT_PRESETS else ""
-            )
             storage.set_ui_state("last_gccb_url", deployment_url)
-
-    def on_gccb_preset_change(e):
-        """Apply selected deployment preset to URL field."""
-        preset_url = (gccb_preset_dropdown.value or "").strip()
-        if preset_url:
-            deployment_url_field.value = preset_url
-            update_status("Applied GCCB deployment preset")
-            page.update()
 
     def on_validate_gccb_url_click(e):
         """Validate deployment URL without saving settings."""
@@ -825,7 +807,7 @@ def main(page: ft.Page):
         page.update()
 
     def on_save_gccb_url_click(e):
-        """Validate and persist deployment URL to flat_settings.json."""
+        """Validate and persist deployment URL to gate_settings.json."""
         nonlocal selected_deployment_url
 
         working_dir = output_dir_field.value
@@ -853,8 +835,6 @@ def main(page: ft.Page):
 
         selected_deployment_url = normalized
         deployment_url_field.value = normalized
-        preset_value = normalized if normalized in GCCB_DEPLOYMENT_PRESETS else ""
-        gccb_preset_dropdown.value = preset_value
         storage.set_ui_state("last_gccb_url", normalized)
 
         update_status("Saved GCCB deployment URL to app settings")
@@ -880,21 +860,6 @@ def main(page: ft.Page):
         value=storage.get_ui_state("last_file"),
         read_only=True,
         expand=True,
-    )
-
-    gccb_preset_dropdown = ft.Dropdown(
-        label="GCCB Deployment Preset",
-        width=430,
-        value=selected_deployment_url if selected_deployment_url in GCCB_DEPLOYMENT_PRESETS else "",
-        options=[
-            ft.dropdown.Option(key="", text="Custom URL"),
-            *[
-                ft.dropdown.Option(key=url, text=url)
-                for url in GCCB_DEPLOYMENT_PRESETS
-                if url
-            ],
-        ],
-        on_change=on_gccb_preset_change,
     )
 
     deployment_url_field = ft.TextField(
@@ -973,9 +938,9 @@ def main(page: ft.Page):
             controls=[
                 # ---- Title
                 ft.Row([
-                    ft.Icon(ft.Icons.APARTMENT, size=28, color=ft.Colors.BLUE_700),
+                    ft.Text("⛩️", size=28),
                     ft.Text(
-                        "FLAT — Flet Layout Application Template",
+                        "GATE — GCCB Alma Transfer Environment",
                         size=24,
                         weight=ft.FontWeight.BOLD,
                     ),
@@ -1027,17 +992,12 @@ def main(page: ft.Page):
                             ),
                             ft.Row(
                                 controls=[
-                                    gccb_preset_dropdown,
+                                    deployment_url_field,
                                     ft.ElevatedButton(
                                         "Validate URL",
                                         icon=ft.Icons.LINK,
                                         on_click=on_validate_gccb_url_click,
                                     ),
-                                ]
-                            ),
-                            ft.Row(
-                                controls=[
-                                    deployment_url_field,
                                     ft.ElevatedButton(
                                         "Save Deployment",
                                         icon=ft.Icons.SAVE,
@@ -1203,7 +1163,7 @@ def main(page: ft.Page):
     page.update()
 
     logger.info("UI initialised successfully")
-    add_log_message("FLAT application ready. Select a function to begin.")
+    add_log_message("GATE application ready. Select a function to begin.")
 
 
 if __name__ == "__main__":

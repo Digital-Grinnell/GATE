@@ -11,10 +11,9 @@ Primary objective:
 
 ## Current Capabilities
 
-- Persistent UI state in ~/FLAT-data/persistent.json
-- Per-folder application settings in flat_settings.json
+- Persistent UI state in ~/GATE-data/persistent.json
+- Per-folder application settings in gate_settings.json
 - Sensitive settings encryption (api_key, api_secret, password)
-- Selectable GCCB deployment presets
 - GCCB deployment URL validation (requires https and host)
 - Save validated deployment URL to per-folder app settings
 - Function-driven workflow model with help mode
@@ -40,14 +39,14 @@ The launch scripts create a virtual environment, install dependencies, and run t
 
 1. Choose Input Directory and Working/Output Directory.
 2. In CollectionBuilder Deployment:
-   - Choose a preset or enter a custom GCCB URL
-   - Click Validate URL
-   - Click Save Deployment to persist to flat_settings.json in the Working/Output Directory
+  - Enter the GCCB URL
+  - Click Validate URL
+  - Click Save Deployment to persist to gate_settings.json in the Working/Output Directory
 3. Use functions to perform workflow steps and inspect status/log output.
 
 ## Settings Model
 
-Settings are saved per Working/Output Directory in flat_settings.json.
+Settings are saved per Working/Output Directory in gate_settings.json.
 
 Current keys include:
 - auto_save_enabled
@@ -57,7 +56,7 @@ Current keys include:
 - password (encrypted)
 - gccb_deployment_url
 
-Encryption key is stored in ~/FLAT-data/encryption_key.
+Encryption key is stored in ~/GATE-data/encryption_key.
 
 ## Project Files
 

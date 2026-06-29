@@ -23,17 +23,17 @@ run.bat
 - Set Input Directory.
 - Set Working/Output Directory.
 
-The Working/Output Directory stores per-project settings in flat_settings.json.
+The Working/Output Directory stores per-project settings in gate_settings.json.
 
 ## 3) Select deployment
 
 In CollectionBuilder Deployment:
 
-1. Choose a preset URL or type a custom URL.
+1. Enter the deployment URL.
 2. Click Validate URL.
 3. Click Save Deployment.
 
-Save Deployment writes gccb_deployment_url into flat_settings.json in the selected Working/Output Directory.
+Save Deployment writes gccb_deployment_url into gate_settings.json in the selected Working/Output Directory.
 
 ## 4) Use functions
 
@@ -48,7 +48,7 @@ Enable Help Mode to view FUNCTION_*.md documentation instead of executing functi
 
 - Use Status output for immediate feedback.
 - Use Log Output for timestamped actions.
-- Runtime logs are saved under ~/FLAT-data/logfiles/.
+- Runtime logs are saved under ~/GATE-data/logfiles/.
 
 ## Validation Commands
 

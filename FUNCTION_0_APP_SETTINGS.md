@@ -5,9 +5,9 @@ Open the application settings file in the selected working/output directory and 
 This includes selecting and persisting the GCCB CollectionBuilder deployment URL used for ingest preparation.
 
 ## Security Note
-**Sensitive fields are encrypted** (`api_key`, `api_secret`, `password`). You enter and see them as plain text in the editor, but they are automatically encrypted when saved to `flat_settings.json`. This makes it safe to commit your settings file to version control (GitHub, etc.) without exposing credentials.
+**Sensitive fields are encrypted** (`api_key`, `api_secret`, `password`). You enter and see them as plain text in the editor, but they are automatically encrypted when saved to `gate_settings.json`. This makes it safe to commit your settings file to version control (GitHub, etc.) without exposing credentials.
 
-The encryption key is stored separately in `~/.FLAT-data/encryption_key` with restricted permissions.
+The encryption key is stored separately in `~/.GATE-data/encryption_key` with restricted permissions.
 
 ## Current Settings
 - **auto_save_enabled**: When `true`, enables automatic saving of output from functions. **[BOOLEAN]**
@@ -34,7 +34,7 @@ The encryption key is stored separately in `~/.FLAT-data/encryption_key` with re
 - Invalid URLs are rejected with an error message.
 
 ## Settings File
-- File name: `flat_settings.json`
+- File name: `gate_settings.json`
 - Location: Inside the selected working/output directory
 
 ## Accepted Boolean Values
