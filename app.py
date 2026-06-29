@@ -14,6 +14,7 @@ import socket
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, Tuple
+from urllib.parse import urlparse
 from cryptography.fernet import Fernet, InvalidToken
 
 # Configure logging
@@ -56,7 +57,13 @@ DEFAULT_APP_SETTINGS = {
     "api_key": "",
     "api_secret": "",
     "password": "",
+    "gccb_deployment_url": "https://black-sky-0a5891010.7.azurestaticapps.net/",
 }
+
+GCCB_DEPLOYMENT_PRESETS = [
+    "",
+    "https://black-sky-0a5891010.7.azurestaticapps.net/",
+]
 
 
 class PersistentStorage:
@@ -252,6 +259,29 @@ def parse_bool_text(value: str) -> Optional[bool]:
     return None
 
 
+def validate_gccb_deployment_url(value: str) -> Tuple[bool, str, str]:
+    """Validate and normalize a GCCB CollectionBuilder deployment URL."""
+    candidate = (value or "").strip()
+    if not candidate:
+        return False, "GCCB deployment URL is required.", ""
+
+    parsed = urlparse(candidate)
+    if parsed.scheme.lower() != "https":
+        return False, "GCCB deployment URL must start with https://", ""
+
+    if not parsed.netloc:
+        return False, "GCCB deployment URL must include a host.", ""
+
+    normalized_path = parsed.path or "/"
+    normalized = f"https://{parsed.netloc}{normalized_path}"
+    if parsed.query:
+        normalized += f"?{parsed.query}"
+    if not normalized.endswith("/") and not parsed.query:
+        normalized += "/"
+
+    return True, "", normalized
+
+
 def load_help_document(filename: str) -> str:
     """Load help documentation from markdown file."""
     try:
@@ -316,6 +346,8 @@ def main(page: ft.Page):
     if input_dir and Path(input_dir).exists():
         current_directory = Path(input_dir)
 
+    selected_deployment_url = storage.get_ui_state("last_gccb_url", "")
+
     dirs_expanded = True
 
     # ------------------------------------------------------------------ directory selection
@@ -333,6 +365,7 @@ def main(page: ft.Page):
         if e.path:
             output_dir_field.value = e.path
             storage.set_ui_state("last_output_dir", e.path)
+            load_gccb_deployment_from_settings(e.path)
             update_status(f"Output directory set: {Path(e.path).name}")
             page.update()
 
@@ -403,6 +436,12 @@ def main(page: ft.Page):
             can_reveal_password=True,
             width=320,
         )
+        gccb_url_field = ft.TextField(
+            label="gccb_deployment_url",
+            value=str(settings.get("gccb_deployment_url", "")),
+            hint_text="https://your-deployment.7.azurestaticapps.net/",
+            width=640,
+        )
 
         settings_path_text = ft.Text(
             f"Settings file: {settings_path}",
@@ -430,12 +469,26 @@ def main(page: ft.Page):
                 "api_key": (api_key_field.value or "").strip(),
                 "api_secret": (api_secret_field.value or "").strip(),
                 "password": (password_field.value or "").strip(),
+                "gccb_deployment_url": "",
             }
+
+            is_valid_url, url_error, normalized_url = validate_gccb_deployment_url(
+                gccb_url_field.value
+            )
+            if not is_valid_url:
+                update_status(f"Error: {url_error}", is_error=True)
+                return
+
+            new_settings["gccb_deployment_url"] = normalized_url
             ok, save_result = save_app_settings(working_dir, new_settings)
             if not ok:
                 update_status(save_result, is_error=True)
                 return
 
+            deployment_url_field.value = normalized_url
+            selected_preset = normalized_url if normalized_url in GCCB_DEPLOYMENT_PRESETS else ""
+            gccb_preset_dropdown.value = selected_preset
+            storage.set_ui_state("last_gccb_url", normalized_url)
             add_log_message(f"Settings saved: {save_result}")
             update_status("Application settings updated")
             settings_dialog.open = False
@@ -467,6 +520,13 @@ def main(page: ft.Page):
                                 password_field,
                             ]
                         ),
+                        ft.Container(height=8),
+                        ft.Text(
+                            "CollectionBuilder deployment:",
+                            size=12,
+                            weight=ft.FontWeight.BOLD,
+                        ),
+                        gccb_url_field,
                     ],
                     tight=True,
                     scroll=ft.ScrollMode.AUTO,
@@ -723,6 +783,84 @@ def main(page: ft.Page):
 
     # ------------------------------------------------------------------ UI fields
 
+    def load_gccb_deployment_from_settings(working_dir: str):
+        """Load GCCB deployment setting from flat_settings.json and update UI."""
+        nonlocal selected_deployment_url
+        if not working_dir:
+            return
+
+        settings, load_error = load_app_settings(working_dir)
+        if load_error:
+            add_log_message(load_error)
+            return
+
+        deployment_url = (settings.get("gccb_deployment_url", "") or "").strip()
+        if deployment_url:
+            selected_deployment_url = deployment_url
+            deployment_url_field.value = deployment_url
+            gccb_preset_dropdown.value = (
+                deployment_url if deployment_url in GCCB_DEPLOYMENT_PRESETS else ""
+            )
+            storage.set_ui_state("last_gccb_url", deployment_url)
+
+    def on_gccb_preset_change(e):
+        """Apply selected deployment preset to URL field."""
+        preset_url = (gccb_preset_dropdown.value or "").strip()
+        if preset_url:
+            deployment_url_field.value = preset_url
+            update_status("Applied GCCB deployment preset")
+            page.update()
+
+    def on_validate_gccb_url_click(e):
+        """Validate deployment URL without saving settings."""
+        is_valid, error_message, normalized = validate_gccb_deployment_url(
+            deployment_url_field.value
+        )
+        if not is_valid:
+            update_status(f"Error: {error_message}", is_error=True)
+            return
+
+        deployment_url_field.value = normalized
+        update_status("GCCB deployment URL is valid")
+        page.update()
+
+    def on_save_gccb_url_click(e):
+        """Validate and persist deployment URL to flat_settings.json."""
+        nonlocal selected_deployment_url
+
+        working_dir = output_dir_field.value
+        if not working_dir:
+            update_status("Error: Please select a Working/Output Directory first", is_error=True)
+            return
+
+        is_valid, error_message, normalized = validate_gccb_deployment_url(
+            deployment_url_field.value
+        )
+        if not is_valid:
+            update_status(f"Error: {error_message}", is_error=True)
+            return
+
+        settings, load_error = load_app_settings(working_dir)
+        if load_error:
+            update_status(load_error, is_error=True)
+            return
+
+        settings["gccb_deployment_url"] = normalized
+        ok, save_result = save_app_settings(working_dir, settings)
+        if not ok:
+            update_status(save_result, is_error=True)
+            return
+
+        selected_deployment_url = normalized
+        deployment_url_field.value = normalized
+        preset_value = normalized if normalized in GCCB_DEPLOYMENT_PRESETS else ""
+        gccb_preset_dropdown.value = preset_value
+        storage.set_ui_state("last_gccb_url", normalized)
+
+        update_status("Saved GCCB deployment URL to app settings")
+        add_log_message(f"Deployment URL saved: {normalized}")
+        page.update()
+
     input_dir_field = ft.TextField(
         label="Input Directory",
         value=storage.get_ui_state("last_input_dir"),
@@ -741,6 +879,28 @@ def main(page: ft.Page):
         label="Select File",
         value=storage.get_ui_state("last_file"),
         read_only=True,
+        expand=True,
+    )
+
+    gccb_preset_dropdown = ft.Dropdown(
+        label="GCCB Deployment Preset",
+        width=430,
+        value=selected_deployment_url if selected_deployment_url in GCCB_DEPLOYMENT_PRESETS else "",
+        options=[
+            ft.dropdown.Option(key="", text="Custom URL"),
+            *[
+                ft.dropdown.Option(key=url, text=url)
+                for url in GCCB_DEPLOYMENT_PRESETS
+                if url
+            ],
+        ],
+        on_change=on_gccb_preset_change,
+    )
+
+    deployment_url_field = ft.TextField(
+        label="GCCB Deployment URL",
+        value=selected_deployment_url,
+        hint_text="https://your-deployment.7.azurestaticapps.net/",
         expand=True,
     )
 
@@ -845,6 +1005,48 @@ def main(page: ft.Page):
                             inputs_inner_column,
                         ],
                         spacing=5,
+                    ),
+                    padding=5,
+                ),
+
+                ft.Divider(height=5),
+
+                # ---- GCCB deployment selection
+                ft.Container(
+                    content=ft.Column(
+                        controls=[
+                            ft.Text(
+                                "CollectionBuilder Deployment",
+                                size=18,
+                                weight=ft.FontWeight.BOLD,
+                            ),
+                            ft.Text(
+                                "Select or enter the GCCB deployment used to prepare Alma-Digital ingest inputs.",
+                                size=13,
+                                color=ft.Colors.GREY_700,
+                            ),
+                            ft.Row(
+                                controls=[
+                                    gccb_preset_dropdown,
+                                    ft.ElevatedButton(
+                                        "Validate URL",
+                                        icon=ft.Icons.LINK,
+                                        on_click=on_validate_gccb_url_click,
+                                    ),
+                                ]
+                            ),
+                            ft.Row(
+                                controls=[
+                                    deployment_url_field,
+                                    ft.ElevatedButton(
+                                        "Save Deployment",
+                                        icon=ft.Icons.SAVE,
+                                        on_click=on_save_gccb_url_click,
+                                    ),
+                                ]
+                            ),
+                        ],
+                        spacing=6,
                     ),
                     padding=5,
                 ),
@@ -996,6 +1198,8 @@ def main(page: ft.Page):
 
     # Initialize function dropdown
     active_function_dropdown.options = get_sorted_function_options(active_functions)
+    if output_dir_field.value and Path(output_dir_field.value).exists():
+        load_gccb_deployment_from_settings(output_dir_field.value)
     page.update()
 
     logger.info("UI initialised successfully")

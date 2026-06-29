@@ -2,6 +2,7 @@
 
 ## Purpose
 Open the application settings file in the selected working/output directory and edit values using popup text input fields.
+This includes selecting and persisting the GCCB CollectionBuilder deployment URL used for ingest preparation.
 
 ## Security Note
 **Sensitive fields are encrypted** (`api_key`, `api_secret`, `password`). You enter and see them as plain text in the editor, but they are automatically encrypted when saved to `flat_settings.json`. This makes it safe to commit your settings file to version control (GitHub, etc.) without exposing credentials.
@@ -14,6 +15,7 @@ The encryption key is stored separately in `~/.FLAT-data/encryption_key` with re
 - **api_key**: Your API key for external services. **[ENCRYPTED]**
 - **api_secret**: Your API secret for external services. **[ENCRYPTED]**
 - **password**: General password field for application use. **[ENCRYPTED]**
+- **gccb_deployment_url**: HTTPS URL for the selected GCCB CollectionBuilder deployment
 
 ## Requirements
 - A **Working/Output Directory** must be selected first.
@@ -22,7 +24,14 @@ The encryption key is stored separately in `~/.FLAT-data/encryption_key` with re
 1. Set **Working/Output Directory**.
 2. Select **0: App Settings** from the function list.
 3. Edit values in the text input fields.
-4. Click **Save**.
+4. Enter or update **gccb_deployment_url**.
+5. Click **Save**.
+
+## URL Validation
+- `gccb_deployment_url` must be a valid URL with:
+  - `https://` scheme
+  - A host value (for example `*.azurestaticapps.net`)
+- Invalid URLs are rejected with an error message.
 
 ## Settings File
 - File name: `flat_settings.json`
@@ -39,6 +48,7 @@ For `auto_save_enabled`, you can enter:
 - Settings are specific to each working/output directory
 - The settings file is created automatically with defaults if it doesn't exist
 - Sensitive fields (marked **[ENCRYPTED]**) are stored encrypted in the JSON file
+- The deployment URL can also be managed from the main **CollectionBuilder Deployment** section in the app UI
 - You can customize the sensitive fields list and default settings in `app.py`
 
 ## Example Settings File (stored encrypted)
@@ -48,7 +58,8 @@ For `auto_save_enabled`, you can enter:
   "auto_save_format": "txt",
   "api_key": "gAAAAABk...[encrypted]",
   "api_secret": "gAAAAABk...[encrypted]",
-  "password": "gAAAAABk...[encrypted]"
+  "password": "gAAAAABk...[encrypted]",
+  "gccb_deployment_url": "https://black-sky-0a5891010.7.azurestaticapps.net/"
 }
 ```
 

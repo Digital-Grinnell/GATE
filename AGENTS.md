@@ -1,90 +1,91 @@
-# FLAT - AI Agent Instructions
+# GATE - AI Agent Instructions
 
-FLAT is a Python desktop application template built with Flet. It is designed as a reusable foundation for workflow tools, with persistent UI state, per-project app settings, logging, function dispatch, and function-specific markdown help.
+GATE is a Flet desktop workflow app used to prepare ingest inputs for Alma-Digital from GCCB/CollectionBuilder deployments.
 
-This repository currently ships example functions (0 to 3):
+Primary purpose:
+- Allow selection of a GCCB CollectionBuilder deployment, for example https://black-sky-0a5891010.7.azurestaticapps.net/
+- Generate Alma-Digital-ready ingest inputs so collection objects can be imported into the Pending Review collection at https://grinnell.primo.exlibrisgroup.com/discovery/collectionDiscovery?vid=01GCL_INST:GCL&collectionId=81313013130004641
+- Support ingest preparation for https://digital.grinnell.edu
 
-- Function 0: App Settings (with encrypted sensitive fields)
-- Function 1: List Files in an input folder
-- Function 2: Count Files by extension
-- Function 3: System Information
+Companion guide:
+- HUMANS.md is the human-facing workflow and prompting guide.
 
-Companion file in this repo: `HUMANS.md` is the human-facing guide for working with AI on FLAT.
+## Product Direction
+
+When proposing or implementing changes, prioritize work that strengthens this pipeline:
+
+1. Select GCCB deployment (URL, validation, persistence)
+2. Retrieve or map deployment object metadata
+3. Transform/map metadata to Alma-Digital ingest shape
+4. Produce repeatable output files for ingest staging and review
+5. Keep process transparent with logs, status, and recoverable settings
+
+Do not treat this project as a generic template unless explicitly requested.
+
+## External Reference Repositories
+
+Use these as implementation references when needed:
+- https://github.com/Digital-Grinnell/common-DG-utilities
+- https://github.com/Digital-Grinnell/manage-digital-ingest-flet-Alma
+
+Guidance for reuse:
+- Prefer adapting patterns and data mapping logic over direct copy/paste.
+- Preserve licensing and attribution requirements for reused code or text.
+- Keep this repo's behavior and naming consistent even when borrowing ideas.
 
 ## Change Priority Order
 
-Always make the smallest change at the highest appropriate layer before editing lower-level runtime code:
+Make the smallest change at the highest appropriate layer first:
 
-1. `FUNCTION_*.md`, `README.md`, `QUICKSTART.md`, and related docs for behavior clarification
-2. Targeted launch/packaging scripts (`run.sh`, `run.bat`, `build_dmg.sh`, `build_windows_zip.sh`)
-3. `python_requirements.txt` for dependency changes
-4. `app.py` for core application logic and UI behavior
-5. Backup or generated artifacts only when explicitly requested
+1. FUNCTION_*.md, README.md, QUICKSTART.md, and related docs
+2. Launch/packaging scripts (run.sh, run.bat, build_dmg.sh, build_windows_zip.sh)
+3. python_requirements.txt for dependency changes
+4. app.py for runtime behavior and UI
+5. Backup or generated artifacts only if explicitly requested
 
-If the issue is documentation, usage text, or function help wording, do not edit `app.py` first.
+If the issue is wording, workflow explanation, or help text, do not edit app.py first.
 
-## Critical Rules
+## Source Of Truth And Scope
 
-### Source of Truth
-- Treat `app.py` as the active runtime source
-- Do not edit `app.py.bak`, `app_from_ohm.py`, or `app_ohm_full.py` unless explicitly requested
-- Keep function docs synchronized with user-visible behavior
+- Treat app.py as the active runtime source.
+- Do not edit app.py.bak, app_from_ohm.py, or app_ohm_full.py unless explicitly requested.
+- Keep behavior docs synchronized with visible UI/runtime behavior.
 
-### Settings and Security
-- Function 0 settings are stored in `flat_settings.json` inside the selected working/output folder
-- Sensitive fields are encrypted by app logic; do not bypass or remove encryption behavior casually
-- Do not hardcode credentials, API keys, or machine-specific secrets in tracked source files
+## Settings, Security, And Data Handling
 
-### Runtime Data and Logs
-- Runtime state is stored outside the repo under `~/FLAT-data/`
-- Typical runtime artifacts include `persistent.json` and `logfiles/`
-- Do not treat runtime logs or user-generated settings files as code edit targets
+- Function 0 settings are per working/output folder in flat_settings.json.
+- Sensitive fields are encrypted by app logic; do not weaken or remove that behavior casually.
+- Do not hardcode credentials, API keys, or environment-specific secrets.
+- Runtime state/logs are stored outside the repo under ~/FLAT-data/.
+- Do not treat runtime artifacts as repository source files.
 
-### Folder Terminology
-- Use "folder" in user-facing content
-- "directory" is acceptable in technical implementation comments but prefer "folder" in docs and UI text
+## Function Documentation Sync
 
-### Function-Specific Documentation
-- When behavior changes for Function 0 through Function 3, update the matching `FUNCTION_*.md`
-- Keep `README.md` or `QUICKSTART.md` aligned when behavior affects broader onboarding
+When changing function behavior, update matching docs in the same change:
+- FUNCTION_0_APP_SETTINGS.md
+- FUNCTION_1_LIST_FILES.md
+- FUNCTION_2_COUNT_FILES.md
+- FUNCTION_3_SYSTEM_INFO.md
 
-### Packaging and Launchers
-- `run.sh` and `run.bat` are launch scripts
-- `build_dmg.sh` and `build_windows_zip.sh` are distribution scripts
-- Avoid packaging changes for requests that are purely workflow/UI logic
+If new ingest-oriented functions are added, create matching FUNCTION_X_*.md files.
 
-## Ask Before Doing These
+## Ask Before These Changes
 
 Explain plan and ask for confirmation before:
+- Refactoring large sections of app.py for a small behavior tweak
+- Changing encryption handling for settings
+- Renaming function IDs/labels that affect existing documentation or workflow
+- Broad dependency upgrades with packaging/runtime impact
+- Deleting historical or backup files
 
-- Refactoring large sections of `app.py` for small behavior tweaks
-- Changing encryption handling for sensitive settings fields
-- Renaming or removing existing function IDs/labels that affect workflow docs
-- Broad dependency upgrades that may alter packaging/runtime behavior
-- Deleting backup files, historical notes, or release-related artifacts
+## Definition Of Done For Workflow Features
 
-## FLAT Surface Map
-
-| File or Area | What it controls |
-|---|---|
-| `app.py` | Main Flet app, function handlers, dialogs, state persistence wiring, logging |
-| `FUNCTION_0_APP_SETTINGS.md` | User help for Function 0 settings and encryption behavior |
-| `FUNCTION_1_LIST_FILES.md` | User help for Function 1 behavior |
-| `FUNCTION_2_COUNT_FILES.md` | User help for Function 2 behavior |
-| `FUNCTION_3_SYSTEM_INFO.md` | User help for Function 3 behavior |
-| `README.md` / `QUICKSTART.md` | Onboarding and high-level usage |
-| `run.sh` / `run.bat` | Cross-platform launch behavior |
-| `build_dmg.sh` / `build_windows_zip.sh` | Packaging workflows |
-| `python_requirements.txt` | Python dependency set |
-
-## Common Mistakes to Avoid
-
-1. Editing `app.py.bak` or legacy reference files instead of `app.py`
-2. Changing function runtime behavior without updating its `FUNCTION_*.md` help file
-3. Treating runtime artifacts in `~/FLAT-data/` as repository source files
-4. Modifying packaging scripts for a request that only needs app behavior/docs changes
-5. Weakening or removing sensitive-field encryption in Function 0
-6. Replacing user-facing "folder" language with more technical wording in docs/UI
+A workflow feature is complete when all are true:
+- User can select or enter a deployment target clearly.
+- Validation/error messages are actionable.
+- Generated outputs are deterministic and stored in the selected working/output folder.
+- Status/log output clearly states what was generated and where.
+- Relevant FUNCTION_*.md and onboarding docs are updated.
 
 ## Validation
 
@@ -95,14 +96,12 @@ python3 -m py_compile app.py
 bash -n run.sh build_dmg.sh build_windows_zip.sh
 ```
 
-For docs-only changes, a focused diff review is sufficient.
+For docs-only edits, focused diff review is sufficient.
 
 ## Working Instructions
 
-When handling a task:
-
-1. Identify whether it is docs, runtime app behavior, launcher/packaging, or dependencies
-2. Read the closest relevant file first instead of broad rewrites
-3. Prefer minimal edits preserving current function model and terminology
-4. Update matching docs when user-visible behavior changes
-5. Validate the changed slice before finishing
+1. Confirm whether request is docs, runtime behavior, packaging, or dependencies.
+2. Read the nearest relevant files before broad edits.
+3. Prefer minimal changes and preserve existing function model unless asked to restructure.
+4. Keep docs and runtime behavior aligned.
+5. Validate the changed slice before finishing.

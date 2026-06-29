@@ -19,14 +19,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Encryption key stored separately in `~/.FLAT-data/encryption_key` with restricted permissions
   - Settings automatically decrypt on load and encrypt on save
   - Safe for version control (credentials stored encrypted)
+- **CollectionBuilder Deployment Selection** in main UI
+  - Preset selector plus custom URL input
+  - URL validation (requires https and host)
+  - Save validated deployment URL to `flat_settings.json`
+  - Load persisted deployment URL per working/output folder
 - Added `cryptography` dependency to `python_requirements.txt`
 - Created `FUNCTION_0_APP_SETTINGS.md` documentation
 
 ### Changed
 - Updated function dropdown to include Function 0 with ⚙️ icon
+- Added `gccb_deployment_url` setting to app defaults and Function 0 settings dialog
 
 ### Documentation
 - **Terminology Convention**: Use "folder" (not "directory") in all user-facing documentation and app interface text. While "directory" is the technical term, "folder" is more familiar to end users. Both terms are synonymous in this codebase.
+- Rewrote `AGENTS.md` and `HUMANS.md` around GCCB to Alma-Digital ingest workflow goals
+- Rewrote `README.md` and `QUICKSTART.md` for GATE mission and deployment selection workflow
 
 ---
 

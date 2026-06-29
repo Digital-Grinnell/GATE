@@ -1,86 +1,92 @@
-# HUMANS.md - Working with AI on FLAT
+# HUMANS.md - Working With AI On GATE
 
-This guide is for you, the human. Its companion, `AGENTS.md`, is written for AI coding assistants. Agents can use `AGENTS.md` as repository guidance for how FLAT is structured and where to make changes. This file focuses on what AI cannot do for you: setting intent, giving clear prompts, and reviewing edits.
+This guide is for project maintainers and contributors. AGENTS.md is the companion file for AI coding assistants.
 
-## What these two files do
+Use this file to define intent, write high-quality prompts, and review whether edits support the actual product goal.
 
-- `AGENTS.md` teaches the agent FLAT-specific rules: edit priorities, source-of-truth files, function-doc sync expectations, settings security constraints, and validation habits.
-- `HUMANS.md` teaches you how to ask for changes and quickly review whether the agent touched the right places.
+## Project Purpose
 
-If FLAT conventions change, update `AGENTS.md` first so future agent sessions inherit correct rules.
+GATE exists to support digital ingest preparation for Digital Grinnell.
 
-## Mental model for this repo
+Primary workflow:
+1. Select a GCCB CollectionBuilder deployment, for example https://black-sky-0a5891010.7.azurestaticapps.net/
+2. Build ingest-ready inputs for Alma-Digital from the selected deployment's objects/metadata
+3. Import those objects into Pending Review:
+	https://grinnell.primo.exlibrisgroup.com/discovery/collectionDiscovery?vid=01GCL_INST:GCL&collectionId=81313013130004641
+4. Support processing for https://digital.grinnell.edu
 
-FLAT is a reusable template app. Most requests fit one of these buckets:
+If a proposed change does not improve this workflow directly or indirectly, question whether it belongs.
 
-1. App behavior/UI in `app.py`
-2. Function help docs in `FUNCTION_*.md`
-3. Launch or packaging scripts (`run.sh`, `run.bat`, `build_dmg.sh`, `build_windows_zip.sh`)
-4. Dependencies in `python_requirements.txt`
-5. High-level documentation (`README.md`, `QUICKSTART.md`, `CHANGELOG.md`)
+## How To Prompt The AI
 
-For best outcomes, describe the behavior you want, not only the file you want edited.
+Prefer outcome-based requests over file-only instructions.
 
-## Prompting patterns that work
+Good prompt pattern:
+- Goal: what ingest step should improve
+- Input: deployment URL pattern, metadata source, folder assumptions
+- Output: exact files/format expected for Alma-Digital ingest
+- Constraints: keep encryption behavior, preserve existing function IDs, update docs
+- Validation: what success should look like in UI/status/log output
 
-Prefer outcome-based prompts.
+Example:
+Add a new function that accepts a GCCB deployment URL, validates reachability, and writes a normalized ingest-input file set to the selected working/output folder. Keep Function 0 encryption unchanged and add help documentation for the new function.
 
-| Instead of | Try |
-|---|---|
-| "Edit `app.py` to change Function 2" | "Make Function 2 include hidden files in extension counts and update its help doc" |
-| "Change the settings JSON behavior" | "Add a new Function 0 setting with encryption if sensitive, and document it" |
-| "Update script" | "Improve `run.sh` startup checks for missing Python and keep behavior aligned with `run.bat`" |
+## Reference Repositories
 
-Helpful details to include:
+When asking for implementation help, you can point the AI at these repositories for patterns:
+- https://github.com/Digital-Grinnell/common-DG-utilities
+- https://github.com/Digital-Grinnell/manage-digital-ingest-flet-Alma
 
-- Function number
-- Exact setting or field name
-- Expected user-visible message or output
-- Platform scope (macOS, Windows, both)
-- Whether docs and changelog should be updated
+Ask the AI to adapt patterns rather than copy blindly, and keep naming/behavior coherent with this repo.
 
-## Diff review checklist
+## Review Checklist
 
-Review carefully if the AI:
+Confirm all of the following:
+- Changes advance deployment selection and/or Alma ingest-input generation.
+- app.py remains the runtime source of truth unless you explicitly requested otherwise.
+- app.py.bak, app_from_ohm.py, and app_ohm_full.py were not edited unintentionally.
+- Sensitive settings encryption behavior was not weakened.
+- Function behavior changes are reflected in matching FUNCTION_*.md docs.
+- README.md and QUICKSTART.md are updated if onboarding changed.
 
-- Edited `app.py.bak`, `app_from_ohm.py`, or `app_ohm_full.py` when you asked for normal app changes
-- Changed packaging scripts when the request was only about a function or UI behavior
-- Changed encryption behavior for sensitive settings fields without explanation
-- Updated `README.md` but not the matching `FUNCTION_*.md` for a function behavior change
-- Touched runtime artifacts outside the repo (such as files under `~/FLAT-data/`)
+## Typical Change Boundaries
 
-Usually, a clean targeted change touches one of these sets:
+Most clean changes should stay within one boundary:
+- Runtime behavior in app.py plus matching FUNCTION_*.md
+- Docs-only updates (FUNCTION_*.md, README.md, QUICKSTART.md)
+- Packaging/launcher updates (run.sh, run.bat, build_dmg.sh, build_windows_zip.sh)
+- Dependency updates in python_requirements.txt with corresponding imports/guards
 
-- One function section in `app.py` plus one matching `FUNCTION_*.md`
-- One launcher or packager script plus supporting docs
-- `python_requirements.txt` plus import/use guards in `app.py`
+## Ask For A Plan First When
 
-## When to ask for a plan first
+Request a plan before edits for:
+- Large refactors
+- Settings/encryption model changes
+- Broad dependency upgrades
+- Cross-platform packaging changes
+- Renaming function IDs or changing core workflow terminology
 
-Ask the agent to show a short plan before editing when work is broad or risky:
+## Lightweight Validation
 
-- Large refactor of `app.py`
-- Any change to sensitive-field encryption or settings persistence model
-- Dependency upgrades that may impact packaging/startup
-- Cross-platform launcher changes
+Use focused validation for touched areas:
 
-## Example prompts
+```bash
+python3 -m py_compile app.py
+bash -n run.sh build_dmg.sh build_windows_zip.sh
+```
 
-Behavior change:
+For docs-only work, review the diff for accuracy and workflow alignment.
 
-> Update Function 1 to optionally include subfolders recursively. Keep default behavior unchanged, add a toggle in the UI, and update Function 1 documentation.
+## Suggested Prompt Templates
 
-Settings change:
+Feature request template:
 
-> Add a new Function 0 setting named `export_prefix`. Keep existing sensitive field handling unchanged and document defaults in the Function 0 help file.
+Goal: Improve [deployment selection | metadata mapping | ingest output generation].
+Input assumptions: [GCCB URL format, metadata endpoints, local folders].
+Output required: [file names, schema, destination folder].
+Constraints: [no encryption regressions, keep existing functions, update docs].
+Validation: [specific status/log messages and sample output expectations].
 
-Packaging change:
+Docs request template:
 
-> Improve macOS DMG build error messages in `build_dmg.sh` without changing output file naming conventions.
-
-## Working rhythm
-
-1. Make one focused change at a time
-2. Validate the touched slice (`py_compile`, script syntax, or doc diff)
-3. Keep function docs synced with behavior
-4. Keep `AGENTS.md` current as your template evolves
+Rewrite AGENTS.md and HUMANS.md so they prioritize selecting a GCCB deployment and generating Alma-Digital Pending Review ingest inputs, and include guidance for using Digital-Grinnell reference repositories.
